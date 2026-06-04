@@ -1,0 +1,3 @@
+Probando.
+
+curl.exe -X POST http://localhost:8080/upload -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODAwMTY5OTUsIm1hdHJpY3VsYSI6IjEtOTMtMDAwMSJ9.bXIWXOqkL0RUyCJcdKTmvWuAy5UvhY-L4nl_Fgcsm6M" -F "file=@prueba.txt"
