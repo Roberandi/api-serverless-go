@@ -1,0 +1,60 @@
+name: CI/CD Serverless Deploy
+
+# Esto hace que el robot se active cada vez que subas código a "main"
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 1. Descargar el código
+      uses: actions/checkout@v3
+
+    - name: 2. Configurar el entorno Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21' # Usamos una versión estable de Go
+
+    - name: 3. Construir y Empaquetar Lambda (Build & Package)
+      run: |
+        # AWS Lambda requiere que el archivo compilado se llame "bootstrap" y sea para Linux
+        GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/api/main.go
+        # Comprimir en .zip para entregarlo a Terraform
+        zip bootstrap.zip bootstrap
+
+    - name: 4. Configurar Credenciales de AWS
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ secrets.AWS_REGION }}
+
+    - name: 5. Instalar Terraform
+      uses: hashicorp/setup-terraform@v2
+
+    - name: 6. Terraform Init
+      run: terraform init
+      working-directory: ./terraform
+
+    - name: 7. Terraform Validate
+      run: terraform validate
+      working-directory: ./terraform
+
+    - name: 8. Terraform Plan
+      run: terraform plan
+      working-directory: ./terraform
+      env:
+        # Inyectamos los secretos para que Terraform los use
+        TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+        TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+
+    - name: 9. Terraform Apply (Despliegue final)
+      run: terraform apply -auto-approve
+      working-directory: ./terraform
+      env:
+        TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
+        TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
