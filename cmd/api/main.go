@@ -82,7 +82,15 @@ func init() {
 
 // Handler es la función que AWS Lambda ejecutará cada vez que llegue una petición
 func Handler(ctx context.Context, req events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return ginLambda.ProxyWithContext(ctx, req)
+	// Intentamos procesar la petición
+	resp, err := ginLambda.ProxyWithContext(ctx, req)
+
+	// Si hay un error, lo registramos en CloudWatch para poder verlo
+	if err != nil {
+		log.Printf("ERROR CRÍTICO EN LAMBDA: %v", err)
+	}
+
+	return resp, err
 }
 
 func main() {
