@@ -27,7 +27,7 @@ func init() {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
 		// Si no hay variable, usamos tu base de datos de Neon por defecto
-		connStr = "postgres://neondb_owner:npg_9Xif8TNzQJrG@ep-wild-heart-apfawq27.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require"
+		connStr = "postgresql://neondb_owner:npg_9Xif8TNzQJrG@ep-wild-heart-apfawq27-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 	}
 
 	db, err := sql.Open("postgres", connStr)

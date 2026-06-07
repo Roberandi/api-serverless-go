@@ -1,3 +1,5 @@
 Probando.
 
 curl.exe -X POST http://localhost:8080/upload -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3ODAwMTY5OTUsIm1hdHJpY3VsYSI6IjEtOTMtMDAwMSJ9.bXIWXOqkL0RUyCJcdKTmvWuAy5UvhY-L4nl_Fgcsm6M" -F "file=@prueba.txt"
+
+postgresql://neondb_owner:npg_9Xif8TNzQJrG@ep-wild-heart-apfawq27-pooler.c-7.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
