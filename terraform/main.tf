@@ -1,6 +1,6 @@
 # 1. Crear un Rol de IAM para que Lambda tenga permisos de ejecutarse
 resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_api_role_v4" # <-- CAMBIO AQUÍ
+  name = "serverless_api_role_v5" # <-- CAMBIO AQUÍ
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -20,7 +20,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 # 2. Definir la Función Lambda
 resource "aws_lambda_function" "api_lambda" {
-  function_name    = "apigolang-serverless-v4" # <-- CAMBIO AQUÍ
+  function_name    = "apigolang-serverless-v5" # <-- CAMBIO AQUÍ
   filename         = "../bootstrap.zip"
   handler          = "bootstrap"
   source_code_hash = filebase64sha256("../bootstrap.zip")
@@ -39,7 +39,7 @@ resource "aws_lambda_function" "api_lambda" {
 
 # 3. Crear el API Gateway
 resource "aws_apigatewayv2_api" "http_api" {
-  name          = "apigolang-http-api-v4" # <-- CAMBIO AQUÍ
+  name          = "apigolang-http-api-v5" # <-- CAMBIO AQUÍ
   protocol_type = "HTTP"
 }
 
