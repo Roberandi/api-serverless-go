@@ -21,9 +21,9 @@ jobs:
 
     - name: 3. Construir y Empaquetar Lambda (Build & Package)
       run: |
-        # AWS Lambda requiere que el archivo compilado se llame "bootstrap" y sea para Linux
-        GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/api/main.go
-        # Comprimir en .zip para entregarlo a Terraform
+        # Agregamos CGO_ENABLED=0 para hacer una compilación estática
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/api/main.go
+        # Comprimir en .zip
         zip bootstrap.zip bootstrap
 
     - name: 4. Configurar Credenciales de AWS
