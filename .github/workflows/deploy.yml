@@ -1,6 +1,5 @@
 name: CI/CD Serverless Deploy
 
-# Esto hace que el robot se active cada vez que subas código a "main"
 on:
   push:
     branches:
@@ -17,14 +16,18 @@ jobs:
     - name: 2. Configurar el entorno Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.21' # Usamos una versión estable de Go
+        go-version: '1.21'
 
-    - name: 3. Construir y Empaquetar Lambda (Build & Package)
+    - name: 3. Construir y Empaquetar Lambdas
       run: |
-        # Agregamos CGO_ENABLED=0 para hacer una compilación estática
+        # A. Compilar y empaquetar la Lambda Principal (API)
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/api/main.go
-        # Comprimir en .zip
         zip bootstrap.zip bootstrap
+        rm bootstrap # Borramos el archivo temporal para no mezclarlos
+        
+        # B. Compilar y empaquetar la Lambda de Notificaciones (El Cocinero)
+        CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/notification/main.go
+        zip notification.zip bootstrap
 
     - name: 4. Configurar Credenciales de AWS
       uses: aws-actions/configure-aws-credentials@v2
@@ -48,9 +51,11 @@ jobs:
       run: terraform plan
       working-directory: ./terraform
       env:
-        # Inyectamos los secretos para que Terraform los use
         TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        # NUEVO: Pasamos las credenciales de correo
+        TF_VAR_smtp_user: ${{ secrets.SMTP_USER }}
+        TF_VAR_smtp_pass: ${{ secrets.SMTP_PASS }}
 
     - name: 9. Terraform Apply (Despliegue final)
       run: terraform apply -auto-approve
@@ -58,3 +63,6 @@ jobs:
       env:
         TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        # NUEVO: Pasamos las credenciales de correo
+        TF_VAR_smtp_user: ${{ secrets.SMTP_USER }}
+        TF_VAR_smtp_pass: ${{ secrets.SMTP_PASS }}

@@ -15,3 +15,15 @@ variable "jwt_secret" {
   type        = string
   sensitive   = true
 }
+
+variable "smtp_user" {
+  description = "Usuario SMTP para correos"
+  type        = string
+  sensitive   = true
+}
+
+variable "smtp_pass" {
+  description = "Contraseña SMTP para correos"
+  type        = string
+  sensitive   = true
+}
