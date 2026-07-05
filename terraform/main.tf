@@ -1,6 +1,6 @@
 # 1. Crear un Rol de IAM para que Lambda tenga permisos de ejecutarse
 resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_api_role_v8"
+  name = "serverless_api_role_v9"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -20,7 +20,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 # 2. Definir la Función Lambda Principal (Backend)
 resource "aws_lambda_function" "api_lambda" {
-  function_name    = "apigolang-serverless-v8"
+  function_name    = "apigolang-serverless-v9"
   filename         = "../bootstrap.zip"
   handler          = "bootstrap"
   source_code_hash = filebase64sha256("../bootstrap.zip")
@@ -41,7 +41,7 @@ resource "aws_lambda_function" "api_lambda" {
 
 # 3. Crear el API Gateway
 resource "aws_apigatewayv2_api" "http_api" {
-  name          = "apigolang-http-api-v8"
+  name          = "apigolang-http-api-v9"
   protocol_type = "HTTP"
 }
 
@@ -135,7 +135,7 @@ resource "aws_sns_topic_subscription" "notif_sub" {
 
 # Rol para que la Lambda de notificaciones pueda ejecutarse y leer de SQS
 resource "aws_iam_role" "notif_lambda_exec" {
-  name = "notification_lambda_role_v8"
+  name = "notification_lambda_role_v9"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -154,7 +154,7 @@ resource "aws_iam_role_policy_attachment" "notif_sqs_policy" {
 
 # La Función Lambda que envía los correos
 resource "aws_lambda_function" "notification_lambda" {
-  function_name    = "notification-lambda-v8"
+  function_name    = "notification-lambda-v9"
   filename         = "../notification.zip"
   handler          = "bootstrap"
   source_code_hash = filebase64sha256("../notification.zip")
@@ -234,7 +234,7 @@ resource "aws_scheduler_schedule" "five_minute_sns_trigger" {
     
     # Mensaje que se enviará automáticamente
     input = jsonencode({
-      email   = "admin@tu-sistema.com",
+      email   = "laingeniera15@gmail.com",
       subject = "Reporte Automatizado - EventBridge",
       message = "Este es un evento programado por EventBridge ejecutándose cada 5 minutos."
     })
