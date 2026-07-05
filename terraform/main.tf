@@ -1,6 +1,6 @@
 # 1. Crear un Rol de IAM para que Lambda tenga permisos de ejecutarse
 resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_api_role_v11"
+  name = "serverless_api_role_v12"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -20,7 +20,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy" {
 
 # 2. Definir la Función Lambda Principal (Backend)
 resource "aws_lambda_function" "api_lambda" {
-  function_name    = "apigolang-serverless-v11"
+  function_name    = "apigolang-serverless-v12"
   filename         = "../bootstrap.zip"
   handler          = "bootstrap"
   source_code_hash = filebase64sha256("../bootstrap.zip")
@@ -90,7 +90,7 @@ resource "aws_sns_topic" "notif_topic" {
 
 # Dar permiso a la Lambda Principal para publicar en el Altoparlante
 resource "aws_iam_role_policy" "lambda_sns_policy" {
-  name   = "lambda_sns_publish_policy_v11"
+  name   = "lambda_sns_publish_policy_v12"
   role   = aws_iam_role.lambda_exec.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -104,7 +104,7 @@ resource "aws_iam_role_policy" "lambda_sns_policy" {
 
 # B. Crear la "Barra de Pedidos / Cola" (SQS Queue)
 resource "aws_sqs_queue" "notif_queue" {
-  name = "email-notifications-queue-v11"
+  name = "email-notifications-queue-v12"
 }
 
 # Dar permiso para que el Altoparlante SNS deje mensajes en la Cola SQS
@@ -135,7 +135,7 @@ resource "aws_sns_topic_subscription" "notif_sub" {
 
 # Rol para que la Lambda de notificaciones pueda ejecutarse y leer de SQS
 resource "aws_iam_role" "notif_lambda_exec" {
-  name = "notification_lambda_role_v11"
+  name = "notification_lambda_role_v12"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -154,7 +154,7 @@ resource "aws_iam_role_policy_attachment" "notif_sqs_policy" {
 
 # La Función Lambda que envía los correos
 resource "aws_lambda_function" "notification_lambda" {
-  function_name    = "notification-lambda-v11"
+  function_name    = "notification-lambda-v12"
   filename         = "../notification.zip"
   handler          = "bootstrap"
   source_code_hash = filebase64sha256("../notification.zip")
@@ -189,7 +189,7 @@ resource "aws_cloudwatch_log_group" "notif_logs" {
 
 # Rol de IAM para que EventBridge Scheduler pueda publicar en SNS
 resource "aws_iam_role" "eventbridge_sns_role" {
-  name = "eventbridge_sns_publish_role_v11"
+  name = "eventbridge_sns_publish_role_v12"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -204,7 +204,7 @@ resource "aws_iam_role" "eventbridge_sns_role" {
 
 # Política para permitir la publicación en el Tópico SNS específico
 resource "aws_iam_role_policy" "eventbridge_sns_policy" {
-  name   = "eventbridge_sns_publish_policy_v11"
+  name   = "eventbridge_sns_publish_policy_v12"
   role   = aws_iam_role.eventbridge_sns_role.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -218,7 +218,7 @@ resource "aws_iam_role_policy" "eventbridge_sns_policy" {
 
 # Creación de la regla del Scheduler utilizando una expresión rate
 resource "aws_scheduler_schedule" "five_minute_sns_trigger" {
-  name       = "trigger-sns-every-5-minutes V11"
+  name       = "trigger-sns-every-5-minutes-V12"
   group_name = "default"
 
   # Expresión RATE utilizada: Ejecutar cada 5 minutos
