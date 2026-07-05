@@ -11,10 +11,10 @@ jobs:
 
     steps:
     - name: 1. Descargar el código
-      uses: actions/checkout@v4 # <-- ACTUALIZADO de v3 a v4
+      uses: actions/checkout@v3
 
     - name: 2. Configurar el entorno Go
-      uses: actions/setup-go@v5 # <-- ACTUALIZADO de v4 a v5
+      uses: actions/setup-go@v4
       with:
         go-version: '1.21'
 
@@ -23,21 +23,21 @@ jobs:
         # A. Compilar y empaquetar la Lambda Principal (API)
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/api/main.go
         zip bootstrap.zip bootstrap
-        rm bootstrap 
+        rm bootstrap # Borramos el archivo temporal para no mezclarlos
         
         # B. Compilar y empaquetar la Lambda de Notificaciones (El Cocinero)
         CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap cmd/notification/main.go
         zip notification.zip bootstrap
 
     - name: 4. Configurar Credenciales de AWS
-      uses: aws-actions/configure-aws-credentials@v4 # <-- ACTUALIZADO de v2 a v4
+      uses: aws-actions/configure-aws-credentials@v2
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
     - name: 5. Instalar Terraform
-      uses: hashicorp/setup-terraform@v3 # <-- ACTUALIZADO de v2 a v3
+      uses: hashicorp/setup-terraform@v2
 
     - name: 6. Terraform Init
       run: terraform init
@@ -53,6 +53,7 @@ jobs:
       env:
         TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        # NUEVO: Pasamos las credenciales de correo
         TF_VAR_smtp_user: ${{ secrets.SMTP_USER }}
         TF_VAR_smtp_pass: ${{ secrets.SMTP_PASS }}
 
@@ -62,5 +63,6 @@ jobs:
       env:
         TF_VAR_database_url: ${{ secrets.DATABASE_URL }}
         TF_VAR_jwt_secret: ${{ secrets.JWT_SECRET }}
+        # NUEVO: Pasamos las credenciales de correo
         TF_VAR_smtp_user: ${{ secrets.SMTP_USER }}
         TF_VAR_smtp_pass: ${{ secrets.SMTP_PASS }}
