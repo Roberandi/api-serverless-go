@@ -182,3 +182,61 @@ resource "aws_cloudwatch_log_group" "notif_logs" {
   name              = "/aws/lambda/${aws_lambda_function.notification_lambda.function_name}"
   retention_in_days = 14
 }
+
+# ==============================================================================
+# 7. AUTOMATIZACIÓN CON AMAZON EVENTBRIDGE SCHEDULER
+# ==============================================================================
+
+# Rol de IAM para que EventBridge Scheduler pueda publicar en SNS
+resource "aws_iam_role" "eventbridge_sns_role" {
+  name = "eventbridge_sns_publish_role_v7"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "scheduler.amazonaws.com"
+      }
+    }]
+  })
+}
+
+# Política para permitir la publicación en el Tópico SNS específico
+resource "aws_iam_role_policy" "eventbridge_sns_policy" {
+  name   = "eventbridge_sns_publish_policy_v7"
+  role   = aws_iam_role.eventbridge_sns_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action   = "sns:Publish"
+      Effect   = "Allow"
+      Resource = aws_sns_topic.notif_topic.arn
+    }]
+  })
+}
+
+# Creación de la regla del Scheduler utilizando una expresión rate
+resource "aws_scheduler_schedule" "five_minute_sns_trigger" {
+  name       = "trigger-sns-every-5-minutes"
+  group_name = "default"
+
+  # Expresión RATE utilizada: Ejecutar cada 5 minutos
+  schedule_expression = "rate(5 minutes)"
+  
+  flexible_time_window {
+    mode = "OFF"
+  }
+
+  target {
+    arn      = aws_sns_topic.notif_topic.arn
+    role_arn = aws_iam_role.eventbridge_sns_role.arn
+    
+    # Mensaje que se enviará automáticamente
+    input = jsonencode({
+      email   = "admin@tu-sistema.com",
+      subject = "Reporte Automatizado - EventBridge",
+      message = "Este es un evento programado por EventBridge ejecutándose cada 5 minutos."
+    })
+  }
+}
